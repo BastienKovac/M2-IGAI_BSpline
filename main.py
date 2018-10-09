@@ -12,5 +12,5 @@ if __name__ == "__main__":
     display(b)
 
     # Surface
-    splines = [BSpline([[2, i, 5], [3, i, 3], [5, i, 4], [1, i, 2], [1, i, 3], [7, i, 2]]) for i in range(-5, 5)]
+    splines = [BSpline([[2, i, 5], [5, i, 4], [1, i, 2], [7, i, 2]]) for i in range(-5, 5)]
     display(splines)

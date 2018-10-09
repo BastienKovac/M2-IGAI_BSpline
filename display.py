@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
+from bspline import BSpline
+
 import numpy as np
 
 
@@ -25,13 +27,20 @@ def __display_2d(points, spline):
     plt.show()
 
 
+def __get_x_y_z(points):
+    x = [p[0] for p in points]
+    y = [p[1] for p in points]
+    z = [p[2] for p in points]
+
+    return x, y, z
+
+
 def __display_3d(points, spline):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    x = [p[0] for p in points]
-    y = [p[1] for p in points]
-    z = [p[2] for p in points]
+    x, y, z = __get_x_y_z(points)
+
     ax.plot(x, y, z, 'r-')
 
     x = [p[0] for p in spline.controls]
@@ -51,24 +60,33 @@ def __display_3d(points, spline):
 
 
 def __display_tensor(splines, step=0.01):
-    all_splines = [spline.compute_range() for spline in splines]
-    if not all(len(spline) == len(all_splines[0]) for spline in all_splines):
-        raise ValueError("All B-Spline must have the same number of points")
+    n = splines[0].n
+    k = splines[0].k
+
+    for spline in splines:
+        if spline.n != n or spline.k != k:
+            raise ValueError('Dimensions of B-Splines do not match')
 
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
 
-    X, Y, Z = [], [], []
-    for spline in all_splines:
-        X.append([p[0] for p in spline])
-        Y.append([p[1] for p in spline])
-        Z.append([p[2] for p in spline])
+    points = [__get_x_y_z(spline.compute_range(step)) for spline in splines]
 
-    X = np.array(X)
-    Y = np.array(Y)
-    Z = np.array(Z)
+    # Plot regular splines
+    for spline_points in points:
+        ax.plot(spline_points[0], spline_points[1], spline_points[2], 'r-')
 
-    ax.plot_surface(X, Y, Z)
+    # Plot "normal" splines
+    N = len(points[0][0])  # Number of points
+
+    controls = [[(p[0][i], p[1][i], p[2][i]) for p in points] for i in range(N)]
+
+    norm_splines = [BSpline(control, k) for control in controls]
+
+    for spline in norm_splines:
+        spline.close()
+        x, y, z = __get_x_y_z(spline.compute_range(step))
+        ax.plot(x, y, z, 'r-')
 
     ax.set_xlabel('$X$')
     ax.set_ylabel('$Y$')

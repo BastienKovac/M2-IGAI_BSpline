@@ -35,6 +35,15 @@ class BSpline:
         self._k = value
         self._nodal = [i for i in range(self.n + self.k)]
 
+    def close(self):
+        for i, v in enumerate(self._nodal):
+            if i < self.k:
+                self._nodal[i] = 0
+            elif i <= self.n:
+                self._nodal[i] -= self.k - 1
+            else:
+                self._nodal[i] = self._nodal[self.n]
+
     def __shift(self, u):
         i = self.k
         dec = 0
